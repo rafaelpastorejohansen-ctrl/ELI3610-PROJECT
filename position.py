@@ -1,6 +1,4 @@
 """
-card_positions.py
-
 Returns the UR3 cup pose for one card.
 Input:  player (1 to 4), hand (1 or 2, 2 = split hand), card (1 to 7)
 Output: [x, y, z, rx, ry, rz] in the robot base frame, metres and radians
