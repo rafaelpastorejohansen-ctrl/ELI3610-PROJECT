@@ -1,6 +1,6 @@
 from blackjack import BlackJack
 from robot_connection import RobotConnection
-import socket
+from card_reader import read_card
 
 number_of_players = int(input("\nHow many players are there: "))
 robot = RobotConnection()
@@ -8,6 +8,27 @@ robot.connect()
 command = f"PLAYERS,{number_of_players}"
 robot.send_command(command)
 print()
+
+def receive_card_from_camera(robot):
+    
+    confirmation = robot.receive_message()
+    if confirmation != "READY":
+        raise ValueError(f"Expected READY, received {confirmation}")
+    
+    rank = read_card()
+    
+    if rank is None:
+        robot.send_command("ERROR,NO_CARD")
+        raise ValueError("No card detected!")
+    
+    robot.send_command("REGISTERED")
+    
+    confirmation = robot.receive_message()
+    if confirmation != "DONE":
+        raise ValueError(f"Expected DONE, received {confirmation}")
+
+    return rank
+
 
 game = BlackJack(number_of_players)
 game.game_state = "dealing"
