@@ -1,6 +1,7 @@
 from blackjack import BlackJack
 from robot_connection import RobotConnection
 from card_reader import read_card
+import position as ps
 
 def receive_card_from_camera(robot):
     
@@ -124,8 +125,9 @@ while game.game_state == "playing":
             for i in range(2):
                 current_hand_index = hand_index + i
                 num_cards = player.hands[current_hand_index].num_cards + 1
-                
-                command = f"HIT,{player_index},{current_hand_index},{num_cards}"
+
+                pose = ps.card_position(player_index + 1, current_hand_index + 1, num_cards)
+                command = f"HIT,{pose}"
                 robot.send_command(command)
                 
                 rank = receive_card_from_camera(robot)
