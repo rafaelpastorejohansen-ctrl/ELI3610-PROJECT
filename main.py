@@ -2,13 +2,6 @@ from blackjack import BlackJack
 from robot_connection import RobotConnection
 from card_reader import read_card
 
-number_of_players = int(input("\nHow many players are there: "))
-robot = RobotConnection()
-robot.connect()
-command = f"PLAYERS,{number_of_players}"
-robot.send_command(command)
-print()
-
 def receive_card_from_camera(robot):
     
     confirmation = robot.receive_message()
@@ -29,32 +22,26 @@ def receive_card_from_camera(robot):
 
     return rank
 
+number_of_players = int(input("\nHow many players are there: "))
+robot = RobotConnection()
+robot.connect()
+command = f"PLAYERS,{number_of_players}"
+robot.send_command(command)
+print()
 
 game = BlackJack(number_of_players)
 game.game_state = "dealing"
 
 for i in range(number_of_players):
-    message = robot.receive_message()
-    message_type, rank = message.split(",")
+    rank = receive_card_from_camera(robot)
     game.receive_card(rank, i)
-    confirmation = robot.receive_message()
-    if confirmation != "DONE":
-        raise ValueError(f"Expected DONE, received {confirmation}")
 
-message = robot.receive_message()
-message_type, rank = message.split(",")
+rank = receive_card_from_camera(robot)
 game.receive_dealer_card(rank)
-confirmation = robot.receive_message()
-if confirmation != "DONE":
-    raise ValueError(f"Expected DONE, received {confirmation}")
 
 for i in range(number_of_players):
-    message = robot.receive_message()
-    message_type, rank = message.split(",")
+    rank = receive_card_from_camera(robot)
     game.receive_card(rank, i)
-    confirmation = robot.receive_message()
-    if confirmation != "DONE":
-        raise ValueError(f"Expected DONE, received {confirmation}")
 
 print()
 
@@ -103,17 +90,8 @@ while game.game_state == "playing":
         
         print()
         
-        message = robot.receive_message()
-        message_type, rank = message.split(",")
-        
-        if message_type != "CARD":
-            raise ValueError(f"Expected CARD, Recevied: {message}")
-        
+        rank = receive_card_from_camera(robot)
         game.receive_card(rank, player_index, hand_index)
-        
-        confirmation = robot.receive_message()
-        if confirmation != "DONE":
-            raise ValueError(f"Expected DONE, received {confirmation}")
         
         result = game.check_hand()
         
@@ -149,17 +127,9 @@ while game.game_state == "playing":
                 
                 command = f"HIT,{player_index},{current_hand_index},{num_cards}"
                 robot.send_command(command)
-                message = robot.receive_message()
-                message_type, rank = message.split(",")
                 
-                if message_type != "CARD":
-                    raise ValueError(f"Expected CARD, Recevied: {message}")
-                
+                rank = receive_card_from_camera(robot)
                 game.receive_card(rank, player_index, current_hand_index)
-                
-                confirmation = robot.receive_message()
-                if confirmation != "DONE":
-                    raise ValueError(f"Expected DONE, received {confirmation}")
         
         except ValueError as error:
             print(error)
@@ -170,14 +140,9 @@ while game.game_state == "playing":
 if game.game_state == "dealer":
     command = "REVEAL,5,0,2"
     robot.send_command(command)
-    message = robot.receive_message()
-    message_type, rank = message.split(",")
-    if message_type != "CARD":
-        raise ValueError(f"Expected CARD, received: {message}")
+    
+    rank = receive_card_from_camera(robot)
     game.receive_dealer_card(rank)
-    confirmation = robot.receive_message()
-    if confirmation != "DONE":
-        raise ValueError(f"Expected DONE, received {confirmation}")
     
     game.display_game()
     
@@ -188,18 +153,9 @@ if game.game_state == "dealer":
         card_count = len(game.dealer.cards) + 1
         command = f"HIT,5,0,{card_count}"
         robot.send_command(command)
-        message = robot.receive_message()
-        message_type, rank = message.split(",")
-        if message_type != "CARD":
-            raise ValueError(f"Expected CARD, received: {message}")
-        try:
-            game.receive_dealer_card(rank)
-        except ValueError as error:
-            raise error
-        confirmation = robot.receive_message()
-        if confirmation != "DONE":
-            raise ValueError(f"Expected DONE, received {confirmation}")
-            
+        
+        rank = receive_card_from_camera(robot)
+        game.receive_dealer_card(rank)
         
         game.display_game()
     
