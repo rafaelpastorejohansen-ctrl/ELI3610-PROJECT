@@ -73,6 +73,7 @@ def plot(pose):
     plt.grid(True)
     plt.legend(loc="upper right")
     plt.show()
+    plt.savefig("tcp_position.png", dpi=300)
 
 if __name__ == "__main__":
     # Manual test: type the numbers and get the pose back

@@ -1,6 +1,6 @@
 from cards import Card, Hand
 from player import Player
-from card_positions import card_position, plot
+import position as ps
 
 class BlackJack():
     def __init__(self, number_of_players):
@@ -45,7 +45,7 @@ class BlackJack():
     
     def hit(self):
         player = self.get_active_player()
-        pose = card_position(self.active_player, player.active_hand, player.get_active_hand().num_cards + 1)
+        pose = ps.card_position(self.active_player + 1, player.active_hand + 1, player.get_active_hand().num_cards + 1)
         return f"HIT,{pose}"
     
     def check_hand(self):
