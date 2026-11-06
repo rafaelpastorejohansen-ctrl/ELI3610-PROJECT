@@ -1,0 +1,92 @@
+def pick_up_and_show():
+  movej(over_deck)
+  movej(deck)
+  set_digital_out(0, True) 
+  movej(over_deck)
+  movej(over_deck_90)
+  movej(over_deck_180)
+  movej(show)
+  deck = pose_add(deck, p[0, 0, -0.0005, 0, 0, 0])
+  #COM script: si ifra at den står i show posisjon
+  
+def rotate_card():
+  movej(over_deck_180)
+  movej(cable_adjustment)
+  movej(place_card)
+  wait(0.5)
+  set_digital_out(0, False)
+  wait(0.5)
+  movej(over_card)
+  movej(help)
+  movej(pd)
+  movej(show_for)
+  movej(show_dev)
+  set_digital_out(0, True)
+  wait(0.5)
+  movej(help)
+  movej(fin)
+
+def place_card(player_pose):
+  over_player_pose = pose_add(player_pose, p[0, 0, 0.1, 0, 0, 0])
+  movej(over_player_pose)
+  movej(player_pose)
+  set_digital_out(0, False)
+  movej(over_player_pose)
+  movej(fin)
+
+def split(player_pose_pickup, player_pose_place):
+  over_player_pose_pickup = pose_add(player_pose_pickup, p[0, 0, 0.1, 0, 0, 0])
+  over_player_pose_place = pose_add(player_pose_place, p[0, 0, 0.1, 0, 0, 0])
+  movej(over_player_pose_pickup)
+  movej(player_pose_pickup)
+  set_digital_out(0, True)
+  movej(over_player_pose_pickup)
+  movej(over_player_pose_place)
+  movej(player_pose_place)
+  set_digital_out(0, False)
+  movej(over_player_pose_place)
+  movej(fin)
+  
+  movej(over_player_pose_pickup)
+  movej(player_pose_pickup)
+  set_digital_out(0, True)
+  movej(over_player_pose_pickup)
+  
+  movej(over_player_pose_place)
+  movej(player_pose_place)
+  set_digital_out(0, False)
+  
+  movej(over_player_pose_place)
+  movej(fin)
+  
+def place_card_dealer():
+  movej(over_dealer)
+  movej(dealer)
+  dealer = pose_add(dealer, p[0, 0, 0, 0, 0, 0]) #Må legge til en offset for å få den til å ligge riktig
+  set_digital_out(0, False)
+  movej(over_dealer)
+  movej(fin)
+  
+def place_hidden_card():
+  movej(over_deck)
+  movej(deck)
+  set_digital_out(0, True)
+  movej(over_deck_low)
+  movej(over_dealer)
+  movej(dealer)
+  set_digital_out(0, False)
+  movej(over_dealer)
+  movej(fin)
+
+def reveal_hidden_card():
+  movej(over_dealer)
+  movej(dealer)
+  set_digital_out(0, True)
+  movej(over_dealer)
+  movej(var1)
+  movej(var2)
+  movej(over_deck)
+  movej(over_deck_90)
+  movej(over_deck_180)
+  movej(show)
+  #COM script: si ifra at den står i show posisjon

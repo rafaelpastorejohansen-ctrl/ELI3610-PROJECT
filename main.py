@@ -34,19 +34,50 @@ game = BlackJack(number_of_players)
 game.game_state = "dealing"
 
 for i in range(number_of_players):
+    pose = ps.card_position(i + 1, 1, 1)
+    command = f"HIT,{pose}"
+    robot.send_command(command)
+    print(command)
+
+    confirmation = robot.receive_message()
+    if confirmation != "DONE":
+        raise ValueError(f"Expected DONE, received {confirmation}")
+        
+    print()
     rank = receive_card_from_camera(robot)
     game.receive_card(rank, i)
+
+command = "DEALER_HIT"
+robot.send_command(command)
+
+confirmation = robot.receive_message()
+if confirmation != "DONE":
+    raise ValueError(f"Expected DONE, received {confirmation}")
 
 rank = receive_card_from_camera(robot)
 game.receive_dealer_card(rank)
 
 for i in range(number_of_players):
+    pose = ps.card_position(i + 1, 1, 2)
+    command = f"HIT,{pose}"
+    robot.send_command(command)
+    print(command)
+
+    confirmation = robot.receive_message()
+    if confirmation != "DONE":
+        raise ValueError(f"Expected DONE, received {confirmation}")
+        
+    print()
+    
     rank = receive_card_from_camera(robot)
     game.receive_card(rank, i)
 
 print()
 
-print("Dealer recives a face-down card")
+command = "DEALER_FACE_DOWN"
+robot.send_command(command)
+
+print("Dealer receives a face-down card")
 
 confirmation = robot.receive_message()
 if confirmation != "DONE":
@@ -122,17 +153,6 @@ while game.game_state == "playing":
             if confirmation != "DONE":
                 raise ValueError(f"Expected DONE, received {confirmation}")
             
-            for i in range(2):
-                current_hand_index = hand_index + i
-                num_cards = player.hands[current_hand_index].num_cards + 1
-
-                pose = ps.card_position(player_index + 1, current_hand_index + 1, num_cards)
-                command = f"HIT,{pose}"
-                robot.send_command(command)
-                
-                rank = receive_card_from_camera(robot)
-                game.receive_card(rank, player_index, current_hand_index)
-        
         except ValueError as error:
             print(error)
     
@@ -153,7 +173,7 @@ if game.game_state == "dealer":
         
         print()
         card_count = len(game.dealer.cards) + 1
-        command = f"HIT,5,0,{card_count}"
+        command = "DEALER_HIT"
         robot.send_command(command)
         
         rank = receive_card_from_camera(robot)
@@ -178,5 +198,3 @@ if game.game_state == "dealer":
             result = game.check_winner(hand)
             print(f"Hand {i}: {result}")
         print()
-
-

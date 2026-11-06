@@ -76,7 +76,8 @@ class BlackJack():
     def split(self):
         player = self.get_active_player()
         hand = player.get_active_hand()
-        pose = ps.card_position(self.active_player + 1, 2, 1)
+        pose_pickup = ps.card_position(self.active_player + 1, 1, 2)
+        pose_place = ps.card_position(self.active_player + 1, 2, 1)
         
         if not hand.can_split():
             raise ValueError("This hand cannot be split")
@@ -84,7 +85,7 @@ class BlackJack():
         player.split_hand()
         
         
-        return f"SPLIT,{pose}"
+        return f"SPLIT,{pose_pickup},{pose_place}"
         
     def dealer_action(self):
         if self.dealer.get_value() < 17:

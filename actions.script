@@ -1,0 +1,23 @@
+def HIT(player_pose):
+    pick_up_and_show()
+    rotate_card()
+    place_card(player_pose)
+
+def SPLIT(player_pose_pickup, player_pose_place):
+    split(player_pose_pickup, player_pose_place)
+    HIT(player_pose_pickup)
+    HIT(player_pose_place)
+    
+def DEALER_FACE_DOWN():
+    place_hidden_card()
+
+def REVEAL():
+    reveal_hidden_card()
+    rotate_card()
+    place_card_dealer()
+    
+    
+def DEALER_HIT():
+    pick_up_and_show()
+    rotate_card()
+    place_card_dealer()
