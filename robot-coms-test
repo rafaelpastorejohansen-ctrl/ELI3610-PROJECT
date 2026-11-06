@@ -1,0 +1,35 @@
+from robot_connection import RobotConnection
+
+ZERO_POSE = "(0,0,0,0,0,0)"
+
+
+def send(robot, command):
+    """Send a command line plus a pose line, like the robot loop expects."""
+    print(f"Sent:     {command}")
+    robot.send_command(command)
+    robot.send_command(ZERO_POSE)
+    reply = robot.receive_message().strip()
+    print(f"Received: {reply}\n")
+    return reply
+
+
+robot = RobotConnection(port=5000)
+robot.connect()
+
+# 1. The robot sends READY right after connecting
+ready = robot.receive_message().strip()
+print(f"Received: {ready}\n")
+assert ready == "READY", "Expected READY from the robot"
+
+# 2. Unknown command: robot should answer ERR, no movement
+assert send(robot, "PING") == "ERR", "Expected ERR for unknown command"
+
+# 3. REGISTERED without a card: robot should answer DONE, no movement
+assert send(robot, "REGISTERED") == "DONE", "Expected DONE for REGISTERED"
+
+# 4. End the robot program
+assert send(robot, "QUIT") == "BYE", "Expected BYE for QUIT"
+
+robot.connection.close()
+robot.server.close()
+print("Communication test OK, no movement was commanded")
