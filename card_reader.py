@@ -4,89 +4,97 @@ import time
 CAMERA_IP = "192.168.12.85"
 REFERENCE_IDS = range(13)  # Endre til indeksene fra SOPAS
 
+"""
+Function to read a card from the camera using the SOPAS protocol.
+Returns the card value if a card is detected, otherwise returns None.
+"""
 def read_card():
     card_value = None
     buffer = b""
-
+    
     with socket.create_connection((CAMERA_IP, 2115), timeout=3) as camera:
-
+        
+        #Function to send a command to the camera and receive a reply.
         def command(text):
             nonlocal buffer
             camera.sendall(text.encode("ascii"))
             deadline = time.monotonic() + 3
-
+            
             while True:
                 start = buffer.find(b"\x02")
                 end = buffer.find(b"\x03", start + 1) if start >= 0 else -1
-
+                
                 if end >= 0:
                     reply = buffer[start + 1:end].decode("ascii")
                     buffer = buffer[end + 1:]
                     return reply
-
+                
                 remaining = deadline - time.monotonic()
                 if remaining <= 0:
                     raise TimeoutError("Ingen komplett respons fra kameraet")
-
+                
                 camera.settimeout(remaining)
                 data = camera.recv(4096)
                 if not data:
                     raise ConnectionError("Kameraet lukket forbindelsen")
                 buffer += data
-
+        """
+        Function to get the result from the camera after triggering a capture.
+        Returns a tuple of (value, reference, image, decision) if a result is available, otherwise returns None.
+        """
         def result():
             deadline = time.monotonic() + 5
-
+            
             while True:
                 reply = command("gRES")
                 print("Svar pÃ¥ gRES:", repr(reply))
-
+                
                 if reply.split()[:2] != ["rgRES", "8005"]:
                     break
-
+                
                 if time.monotonic() >= deadline:
                     raise TimeoutError("Kameraet var opptatt i over 5 sekunder")
-
+                
                 time.sleep(0.1)
-
+                
             if reply.strip() == "rgRES 0 No result available.":
                 return None
-
+                
             if not reply.startswith("rgRES 0 "):
                 raise RuntimeError(f"gRES feilet: {reply!r}")
-
+                
             start = reply.find("BEGIN;")
             if start < 0:
                 raise ValueError(
                     f"Resultatet mangler 'BEGIN;': {reply!r}"
                     )
-
+                
             start += len("BEGIN;")
             end = reply.find(";END", start)
             if end < 0:
                 raise ValueError(
                     f"Resultatet mangler ';END': {reply!r}"
                     )
-
+                
             fields = reply[start:end].split(";")
             if len(fields) != 4:
                 raise ValueError(
                     f"Forventet 4 resultatfelt, fikk {len(fields)}: {reply!r}"
                     )
-
+                
             value, reference, image, decision = fields
             return value, int(reference), int(image), int(decision)
-
+            
         for reference_id in REFERENCE_IDS:
             text = f"sINT 1 {reference_id}"
             print("Sender:", repr(text))
-
+            
             reply = command(text)
             print("Mottar:", repr(reply))
-
+            
             if reply.split() != ["rsINT", "1", "0"]:
                 raise RuntimeError(reply)
-
+            
             deadline = time.monotonic() + 5
             while command("gINT 1").split() != [
                 "rgINT", "1", "0", str(reference_id)
@@ -94,50 +102,50 @@ def read_card():
                 if time.monotonic() >= deadline:
                     raise TimeoutError("Referansebyttet tok for lang tid")
                 time.sleep(0.1)
-
+                
             time.sleep(1)
-
+            
             previous_result = result()
             previous_image = (
                 previous_result[2] if previous_result is not None else None
             )
-
+            
             print("Modus:", repr(command("gMOD")))
             print("Aktiv referanse:", repr(command("gINT 1")))
-
+            
             reply = command("TRIG")
             print("Triggersvar:", repr(reply))
-
+            
             if reply.split() != ["rTRIG", "0"]:
                 raise RuntimeError(reply)
-
+            
             deadline = time.monotonic() + 5
-
+            
             while True:
                 time.sleep(0.1)
                 current_result = result()
-
+                
                 if current_result is not None:
                     value, reference, image, decision = current_result
-
+                    
                     print(
                         f"Forventer ref={reference_id}, "
                         f"forrige bilde={previous_image} | "
                         f"Mottatt ref={reference}, "
                         f"bilde={image}, decision={decision}"
                     )
-
+                    
                     if (
                         reference == reference_id
                         and image != previous_image
                     ):
                         break
-
+                    
                 if time.monotonic() >= deadline:
                     raise TimeoutError("Ingen nytt bilderesultat")
-
+                    
             if decision == 2:
                 card_value = value
                 break
-            
+                
     return card_value
