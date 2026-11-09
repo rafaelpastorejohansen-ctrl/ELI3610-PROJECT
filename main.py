@@ -26,10 +26,6 @@ def receive_card_from_camera(robot):
         raise ValueError("No card detected!")
     
     robot.send_command("REGISTERED")
-    
-    confirmation = robot.receive_message()
-    if confirmation != "DONE":
-        raise ValueError(f"Expected DONE, received {confirmation}")
 
     return rank
 
@@ -53,29 +49,34 @@ for i in range(number_of_players):
     command = "HIT"
     send(robot, command, pose)
     
-    
+    rank = receive_card_from_camera(robot)
+    game.receive_card(rank, i)    
     confirmation = robot.receive_message()
     if confirmation != "DONE":
         raise ValueError(f"Expected DONE, received {confirmation}")
 
-    rank = receive_card_from_camera(robot)
-    game.receive_card(rank, i)    
+
     print()
 
 command = "DEALER_HIT"
 send(robot, command)
 
+rank = receive_card_from_camera(robot)
+game.receive_dealer_card(rank)
+
 confirmation = robot.receive_message()
 if confirmation != "DONE":
     raise ValueError(f"Expected DONE, received {confirmation}")
 
-rank = receive_card_from_camera(robot)
-game.receive_dealer_card(rank)
+
 
 for i in range(number_of_players):
     pose = ps.card_position(i + 1, 1, 1)
     command = "HIT"
     send(robot, command, pose)
+
+    rank = receive_card_from_camera(robot)
+    game.receive_card(rank, i)
 
     confirmation = robot.receive_message()
     if confirmation != "DONE":
@@ -83,8 +84,7 @@ for i in range(number_of_players):
         
     print()
     
-    rank = receive_card_from_camera(robot)
-    game.receive_card(rank, i)
+
 
 print()
 

@@ -65,9 +65,8 @@ def read_card():
                 
             start = reply.find("BEGIN;")
             if start < 0:
-                raise ValueError(
-                    f"Resultatet mangler 'BEGIN;': {reply!r}"
-                    )
+                print("Ukjent resultatformat, ignorerer:", repr(reply))
+                return None
                 
             start += len("BEGIN;")
             end = reply.find(";END", start)
@@ -137,7 +136,7 @@ def read_card():
                     
                     if (
                         reference == reference_id
-                        and image != previous_image
+                        #and image != previous_image
                     ):
                         break
                     
