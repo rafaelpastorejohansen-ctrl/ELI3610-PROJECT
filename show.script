@@ -1,0 +1,24 @@
+kort_socket = "kortleser"
+kort_python_ip = "192.168.0.100"
+kort_python_port = 5000
+kort_timeout = 60.0
+
+def show():
+    if not socket_open(kort_python_ip, kort_python_port, kort_socket):
+    textmsg("Kortleser: Kunne ikke koble til Python")
+    halt
+    end
+
+    if not socket_send_line("READY", kort_socket):
+    socket_close(kort_socket)
+    textmsg("Kortleser: Kunne ikke sende ready")
+    halt
+    end
+
+    kort_svar = socket_read_string(kort_socket, suffix="\n", interpret_escape=True, timeout=kort_timeout)
+    socket_close(kort_socket)
+
+    if kort_svar != "REGISTERED":
+    textmsg("Kortleser: Mangler REGISTERED. Svar: ", kort_svar)
+    halt
+    end

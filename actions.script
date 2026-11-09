@@ -16,7 +16,6 @@ def REVEAL():
     rotate_card()
     place_card_dealer()
     
-    
 def DEALER_HIT():
     pick_up_and_show()
     rotate_card()

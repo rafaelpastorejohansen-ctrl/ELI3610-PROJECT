@@ -7,7 +7,7 @@ def pick_up_and_show():
   movej(over_deck_180)
   movej(show)
   deck = pose_add(deck, p[0, 0, -0.0005, 0, 0, 0])
-  #COM script: si ifra at den står i show posisjon
+  script()
   
 def rotate_card():
   movej(over_deck_180)

@@ -29,8 +29,6 @@ def receive_card_from_camera(robot):
 number_of_players = int(input("\nHow many players are there: "))
 robot = RobotConnection()
 robot.connect()
-command = f"PLAYERS,{number_of_players}"
-robot.send_command(command)
 print()
 
 game = BlackJack(number_of_players)
