@@ -15,32 +15,24 @@ while running:
       pose2 = p[values[7], values[8], values[9], values[10], values[11], values[12]]
       textmsg("Command: ", cmd)
 
-      if cmd == "PLAYER":
-        PLAYER(pose, pose2)
-        socket_send_line("DONE", "pc")
-
-      elif cmd == "HIT":
-        HIT(pose, pose2)
+      if cmd == "HIT":
+        HIT(pose)
         socket_send_line("DONE", "pc")
 
       elif cmd == "SPLIT":
         SPLIT(pose, pose2)
         socket_send_line("DONE", "pc")
 
-      elif cmd == "REGISTERED":
-        REGISTERED(pose, pose2)
-        socket_send_line("DONE", "pc")
-
       elif cmd == "REVEAL":
-        REVEAL(pose, pose2)
+        REVEAL()
         socket_send_line("DONE", "pc")
 
       elif cmd == "DEALER_HIT":
-        DEALER_HIT(pose, pose2)
+        DEALER_HIT()
         socket_send_line("DONE", "pc")
 
       elif cmd == "DEALER_FACEDOWN":
-        DEALER_FACEDOWN(pose, pose2)
+        DEALER_FACEDOWN()
         socket_send_line("DONE", "pc")
 
       elif cmd == "QUIT":
