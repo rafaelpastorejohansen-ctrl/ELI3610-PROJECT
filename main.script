@@ -1,0 +1,58 @@
+running = True
+
+while running:
+  cmd = socket_read_line("pc")
+
+  if cmd != "":
+    values = socket_read_ascii_float(12, "pc")
+
+    if values[0] != 12:
+      textmsg("No valid poses for command: ", cmd)
+      socket_send_line("ERR", "pc")
+
+    else:
+      pose  = p[values[1], values[2], values[3], values[4], values[5], values[6]]
+      pose2 = p[values[7], values[8], values[9], values[10], values[11], values[12]]
+      textmsg("Command: ", cmd)
+
+      if cmd == "PLAYER":
+        PLAYER(pose, pose2)
+        socket_send_line("DONE", "pc")
+
+      elif cmd == "HIT":
+        HIT(pose, pose2)
+        socket_send_line("DONE", "pc")
+
+      elif cmd == "SPLIT":
+        SPLIT(pose, pose2)
+        socket_send_line("DONE", "pc")
+
+      elif cmd == "REGISTERED":
+        REGISTERED(pose, pose2)
+        socket_send_line("DONE", "pc")
+
+      elif cmd == "REVEAL":
+        REVEAL(pose, pose2)
+        socket_send_line("DONE", "pc")
+
+      elif cmd == "DEALER_HIT":
+        DEALER_HIT(pose, pose2)
+        socket_send_line("DONE", "pc")
+
+      elif cmd == "DEALER_FACEDOWN":
+        DEALER_FACEDOWN(pose, pose2)
+        socket_send_line("DONE", "pc")
+
+      elif cmd == "QUIT":
+        running = False
+        socket_send_line("BYE", "pc")
+
+      else:
+        textmsg("Unknown command: ", cmd)
+        socket_send_line("ERR", "pc")
+      end
+    end
+  end
+end
+
+socket_close("pc")

@@ -53,7 +53,7 @@ class BlackJack():
     def hit(self):
         player = self.get_active_player()
         pose = ps.card_position(self.active_player + 1, player.active_hand + 1, player.get_active_hand().num_cards + 1)
-        return f"HIT,{pose}"
+        return pose
     
     #Method to check the status of the active player's hand and update the game state accordingly
     def check_hand(self):
@@ -94,7 +94,7 @@ class BlackJack():
         player.split_hand()
         
         
-        return f"SPLIT,{pose_pickup},{pose_place}"
+        return pose_pickup, pose_place
     
     #Method to handle the dealer's action based on the dealer's hand value
     def dealer_action(self):

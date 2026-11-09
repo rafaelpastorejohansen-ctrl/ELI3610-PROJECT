@@ -4,6 +4,14 @@ from robot_connection import RobotConnection
 from card_reader import read_card
 import position as ps
 
+ZERO = [0,0,0,0,0,0]
+
+def send(robot, command, pose=ZERO, pose2=ZERO):
+    values = ",".join(f"{v:.5f}" for v in list(pose) + list(pose2))
+    robot.send_command(command)
+    robot.send_command(f"({values})")
+    print(f"{command}, {values}")
+
 #Function to receive a card from the camera and return its rank
 def receive_card_from_camera(robot):
     
@@ -29,6 +37,8 @@ def receive_card_from_camera(robot):
 number_of_players = int(input("\nHow many players are there: "))
 robot = RobotConnection()
 robot.connect()
+#command = f"PLAYER,[0,0,0,0,0,0],[0,0,0,0,0,0]"
+#robot.send_command(command)
 print()
 
 game = BlackJack(number_of_players)
@@ -40,20 +50,20 @@ and receive the card ranks from the camera
 """
 for i in range(number_of_players):
     pose = ps.card_position(i + 1, 1, 1)
-    command = f"HIT,{pose}"
-    robot.send_command(command)
-    print(command)
-
+    command = "HIT"
+    send(robot, command, pose)
+    
+    
     confirmation = robot.receive_message()
     if confirmation != "DONE":
         raise ValueError(f"Expected DONE, received {confirmation}")
-        
-    print()
+
     rank = receive_card_from_camera(robot)
-    game.receive_card(rank, i)
+    game.receive_card(rank, i)    
+    print()
 
 command = "DEALER_HIT"
-robot.send_command(command)
+send(robot, command)
 
 confirmation = robot.receive_message()
 if confirmation != "DONE":
@@ -63,10 +73,9 @@ rank = receive_card_from_camera(robot)
 game.receive_dealer_card(rank)
 
 for i in range(number_of_players):
-    pose = ps.card_position(i + 1, 1, 2)
-    command = f"HIT,{pose}"
-    robot.send_command(command)
-    print(command)
+    pose = ps.card_position(i + 1, 1, 1)
+    command = "HIT"
+    send(robot, command, pose)
 
     confirmation = robot.receive_message()
     if confirmation != "DONE":
@@ -80,7 +89,7 @@ for i in range(number_of_players):
 print()
 
 command = "DEALER_FACE_DOWN"
-robot.send_command(command)
+send(robot, command)
 
 print("Dealer receives a face-down card")
 
@@ -135,9 +144,10 @@ while game.game_state == "playing":
     if action == "H":
         player_index = game.active_player
         hand_index = player.active_hand
-        
-        command = game.hit()
-        robot.send_command(command)
+
+        command = "HIT"
+        pose = game.hit()
+        send(robot, command, pose)
         print(command)
         
         print()
@@ -165,8 +175,9 @@ while game.game_state == "playing":
         hand_index = player.active_hand
         
         try:
-            command = game.split()
-            robot.send_command(command)
+            command = "SPLIT"
+            pose1, pose2 = game.split()
+            robot.send(robot, command, pose1, pose2)
             print(command)
             
             confirmation = robot.receive_message()
@@ -191,8 +202,8 @@ displaying the outcome for each hand.
 """
 
 if game.game_state == "dealer":
-    command = "REVEAL,5,0,2"
-    robot.send_command(command)
+    command = "REVEAL"
+    send(robot, command)
     
     rank = receive_card_from_camera(robot)
     game.receive_dealer_card(rank)
@@ -205,7 +216,7 @@ if game.game_state == "dealer":
         print()
         card_count = len(game.dealer.cards) + 1
         command = "DEALER_HIT"
-        robot.send_command(command)
+        robot.send(robot, command)
         
         rank = receive_card_from_camera(robot)
         game.receive_dealer_card(rank)
