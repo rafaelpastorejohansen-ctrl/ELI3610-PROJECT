@@ -14,15 +14,15 @@ def send(robot, command, pose=ZERO, pose2=ZERO):
 
 #Function to receive a card from the camera and return its rank
 def receive_card_from_camera(robot):
-    print("Check recieve from camera")
-    rank = read_card()
-    print("Check after read card")
-    if rank is None:
-        robot.send_command("ERROR,NO_CARD")
-        raise ValueError("No card detected!")
-    print("Check before send register")
+    rank = None
+    while rank is None:
+        rank = read_card()
+
+        if rank is None:
+            print("No card detected!")
+            print("Checking card again...")
+    
     robot.send_command("REGISTERED")
-    print("Befroe reitnerkofwlerpfre")
 
     return rank
 
@@ -55,11 +55,9 @@ for i in range(number_of_players):
     
     confirmation = None
 
-    print("Check")
     rank = receive_card_from_camera(robot)
-    print("After rank")
-    game.receive_card(rank, i)    
-    print("After game.recieve")
+    game.receive_card(rank, i)
+
     print()
 
     confirmation = robot.receive_message()
@@ -90,13 +88,9 @@ for i in range(number_of_players):
     if confirmation != "DONE":
         raise ValueError(f"Expected DONE, received {confirmation}")
     
-    confirmation = None
-
-    print("Check")
     rank = receive_card_from_camera(robot)
-    print("After rank")
     game.receive_card(rank, i)    
-    print("After game.recieve")
+
     print()
 
     confirmation = robot.receive_message()
@@ -165,7 +159,6 @@ while game.game_state == "playing":
         command = "HIT"
         pose = game.hit()
         send(robot, command, pose)
-        print(command)
 
         confirmation = robot.receive_message()
         if confirmation != "DONE":
@@ -173,7 +166,7 @@ while game.game_state == "playing":
         
         print()
         
-        rank = receive_card_from_camera(camera)
+        rank = receive_card_from_camera(robot)
         game.receive_card(rank, player_index, hand_index)
 
         confirmation = robot.receive_message()
@@ -221,14 +214,23 @@ while game.game_state == "playing":
             print("First card delivered")
             if confirmation != "DONE":
                 raise ValueError(f"Expected DONE, received {confirmation}")
-             
+
+            command = "HIT"
+            pose = ps.card_position(player_index + 1, 2, 2)
+            send(robot, command, pose)
+    
+            confirmation = robot.receive_message()
+            if confirmation != "DONE":
+                raise ValueError(f"Expected DONE, received {confirmation}") 
+            
+            print()
+            
             rank = receive_card_from_camera(robot)
             game.receive_card(rank, player_index, hand_index + 1)
 
             confirmation = robot.receive_message()
-            print("Second card delivered")
             if confirmation != "DONE":
-                raise ValueError(f"Expected DONE, received {confirmation}")       
+                raise ValueError(f"Expected DONE, received {confirmation}")      
                 
         except ValueError as error:
             print(error)
@@ -276,7 +278,7 @@ if game.game_state == "dealer":
         if confirmation != "DONE":
             raise ValueError(f"Expected DONE, received {confirmation}")
         
-        rank = receive_card_from_camera(camera)
+        rank = receive_card_from_camera(robot)
         game.receive_dealer_card(rank)
 
         confirmation = robot.receive_message()
@@ -302,3 +304,6 @@ if game.game_state == "dealer":
             result = game.check_winner(hand)
             print(f"Hand {i}: {result}")
         print()
+
+command = "QUIT"
+send(robot, command)

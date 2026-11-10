@@ -107,10 +107,10 @@ def read_card():
 
             start += len("BEGIN;")
             end = reply.find(";END", start)
+
             if end < 0:
-                raise ValueError(
-                    f"Resultatet mangler ';END': {reply!r}"
-                    )
+                print(f"Incomplete camera result, retrying: {reply!r}")
+                return None
 
             fields = reply[start:end].split(";")
             if len(fields) != 4:
@@ -140,15 +140,14 @@ def read_card():
                         raise TimeoutError("Referansebyttet tok for lang tid")
                     time.sleep(0.1)
 
-                time.sleep(1)
+                time.sleep(0.8)
 
                 previous_result = result()
                 previous_image = (
                     previous_result[2] if previous_result is not None else None
                 )
 
-                print("Modus:", repr(command("gMOD")))
-                print("Aktiv referanse:", repr(command("gINT 1")))
+                print("Reference before trigger:", command("gINT 1"))
 
                 reply = command("TRIG")
                 print("Triggersvar:", repr(reply))
@@ -159,7 +158,7 @@ def read_card():
                 deadline = time.monotonic() + 5
 
                 while True:
-                    time.sleep(0.1)
+                    time.sleep(0.05)
                     current_result = result()
 
                     if current_result is not None:
@@ -174,7 +173,7 @@ def read_card():
 
                         if (
                             reference == reference_id
-                            #and image != previous_image
+                            and image != previous_image
                         ):
                             break
 

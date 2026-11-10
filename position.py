@@ -11,7 +11,7 @@ from scipy.spatial.transform import Rotation as R
 REF_POSE = [0.44763, 0.01592, -0.02127, 0.254, -3.152, 0.0]
 
 SEAT_STEP = 20.0    # deg between players
-HAND_ANGLE = 8.0    # deg between hand 1 and hand 2
+HAND_ANGLE = 10.0    # deg between hand 1 and hand 2
 SEAT_DIR = -1       # direction from player 1 toward player 4
 R_MAX = 0.5443      # m, radius of the last card (max reach)
 Z_STEP = 0.0005     # m height added per card
