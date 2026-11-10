@@ -1,10 +1,26 @@
 running = True
+empty_reads = 0
 
 while running:
-  cmd = socket_read_line("pc")
+  cmd = socket_read_line("pc", timeout=2)
 
-  if cmd != "":
-    values = socket_read_ascii_float(12, "pc")
+  if cmd == "":
+    # Nothing arrived. Pause so the loop never runs at full speed.
+    sleep(0.1)
+    empty_reads = empty_reads + 1
+
+    # A healthy, idle connection gives about one empty read per 2 s.
+    # A dead connection gives them back to back. 100 in a row without
+    # any command means the PC is gone or silent for a long time.
+    if empty_reads >= 100:
+      textmsg("No contact with PC, stopping")
+      running = False
+    end
+
+  else:
+    empty_reads = 0
+    textmsg("Command: ", cmd)
+    values = socket_read_ascii_float(12, "pc", timeout=5)
 
     if values[0] != 12:
       textmsg("No valid poses for command: ", cmd)
@@ -13,7 +29,6 @@ while running:
     else:
       pose  = p[values[1], values[2], values[3], values[4], values[5], values[6]]
       pose2 = p[values[7], values[8], values[9], values[10], values[11], values[12]]
-      textmsg("Command: ", cmd)
 
       if cmd == "HIT":
         HIT(pose)
@@ -48,3 +63,4 @@ while running:
 end
 
 socket_close("pc")
+textmsg("Program finished")

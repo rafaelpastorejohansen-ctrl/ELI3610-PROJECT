@@ -1,4 +1,4 @@
-from robot_connection import RobotConnection
+from connections import RobotConnection
 
 ZERO = [0, 0, 0, 0, 0, 0]
 
